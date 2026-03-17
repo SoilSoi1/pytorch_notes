@@ -184,7 +184,7 @@ cmake ..
 make
 ```
 
-我对C++不太熟悉，所以这里从我个人角度，详细地解释一下以上每一步给C++项目带来的改变。
+我对C++不太熟悉，所以这里从我**个人角度**，详细地解释一下以上每一步给C++项目带来的改变。
 
 `cmake_minimum_required()`和`set()`这两个比较好理解，没什么歧义。
 
@@ -203,6 +203,41 @@ make
 最后执行`make`命令，这个命令是告诉系统要根据生成的构建文件来构建项目。
 执行完这个命令之后，`build/`目录下就会生成一个可执行文件，名字叫demo，这个文件就是我们最终的构建结果，可以直接运行这个文件来查看输出的结果.
 
+#### 在CMake中链接第三方库
+在C++项目中，通常会使用一些第三方库来实现特定的功能，例如OpenCV、Boost等。
 
+最基本的是源代码形式的第三方库，直接把第三方库的源代码放在项目的某个目录下，然后在CMakeLists.txt文件中添加相应的指令来编译这些源代码。
+例如，json文件解析库`nlohmann/json`，可以直接把它的源代码放在项目的`nlohmann/json`目录下，然后在CMakeLists.txt文件中添加以下指令：
+```cmake
+...
+include_directories(nlohmann/json)
+add_executable(demo main.cpp)
+```
+这样就可以在mian.cpp中通过`#include "json.hpp"`来引用这个库了。
 
+又假如这个库是.hpp和.cpp文件一起组成的，放在lib目录下，那么在CMakeLists.txt文件中就需要添加以下指令：
+```cmake
+...
+include_directories(nlohmann lib)
+add_executable(demo main.cpp lib/lib.cpp)
+```
+
+而对于预编译安装包，比如yaml-cpp库，可以通过`sudo apt install libyaml-cpp-dev`命令来安装这个库。
+
+安装完成后，在CMakeLists.txt文件中添加以下指令：
+```cmake
+...
+find_package(yaml-cpp REQUIRED)
+include_directories(${YAML_CPP_INCLUDE_DIRS})
+add_executable(demo main.cpp)
+target_link_libraries(demo ${YAML_CPP_LIBRARIES})
+```
+其中，`find_package()`命令用于查找已经安装的yaml-cpp库，`include_directories()`命令用于添加yaml-cpp库的头文件路径，
+`target_link_libraries()`命令用于链接yaml-cpp库到demo可执行文件中。
+
+#### 基于VS Code的C++开发环境
+VS Code提供了一个名为`CMake Tools`的扩展，可以让用户直接在VS Code中进行C++项目的构建和调试。
+首先，安装`CMake Tools`扩展。
+然后在VS Code中打开C++项目的根目录，点击左侧的CMake Tools图标，选择`Configure`来配置项目，选择生成器为`Unix Makefiles`，选择编译器为`gcc`，然后点击`Build`来构建项目。
+构建完成后，可以点击`Run`来运行项目，或者点击`Debug`来调试项目.
 
